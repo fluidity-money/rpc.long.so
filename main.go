@@ -13,7 +13,7 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 )
 
-type service struct {
+type Service struct {
 	db *sql.DB
 }
 
@@ -31,7 +31,7 @@ type (
 	}
 )
 
-func (s service) Pools(r *http.Request, args *PoolsArgs, reply *PoolsResp) error {
+func (s Service) Pools(r *http.Request, args *PoolsArgs, reply *PoolsResp) error {
 	reply.Pools = []Pool{{
 		Address: "Alex",
 	}}
@@ -39,7 +39,7 @@ func (s service) Pools(r *http.Request, args *PoolsArgs, reply *PoolsResp) error
 }
 
 func main() {
-	s := service{}
+	s := Service{}
 	r := rpc.NewServer()
 	r.RegisterService(&s, "")
 	r.RegisterCodec(json.NewCodec(), "application/json")
