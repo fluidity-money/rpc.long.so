@@ -31,10 +31,11 @@ type (
 	}
 )
 
-func (s service) Pools(r *http.Request, args *PoolsArgs, reply *PoolResp) error {
-	args.Pools = []Pool{
+func (s service) Pools(r *http.Request, args *PoolsArgs, reply *PoolsResp) error {
+	reply.Pools = []Pool{{
 		Address: "Alex",
-	}
+	}}
+	return nil
 }
 
 func main() {
