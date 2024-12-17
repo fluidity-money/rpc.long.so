@@ -44,5 +44,5 @@ func main() {
 	r.RegisterService(&s, "")
 	r.RegisterCodec(json.NewCodec(), "application/json")
 	http.Handle("/", r)
-	lambda.Start(httpadapter.NewV2(http.DefaultServeMux).ProxyWithContext)
+	lambda.Start(httpadapter.New(http.DefaultServeMux).ProxyWithContext)
 }
