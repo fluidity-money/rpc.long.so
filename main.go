@@ -54,8 +54,7 @@ FROM snapshot_positions_latest_decimals_grouped_1`,
 	for rows.Next() {
 		var (
 			pool       longTypes.Address
-			decimals   int
-			liq0, liq1 longTypes.Number
+			decimals, liq0, liq1 longTypes.Number
 		)
 		if err := rows.Scan(&pool, &decimals, &liq0, &liq1); err != nil {
 			slog.Error("Error scanning pools",
@@ -63,9 +62,10 @@ FROM snapshot_positions_latest_decimals_grouped_1`,
 			)
 			return fmt.Errorf("scanning pools")
 		}
+		d := decimals.Int64()
 		reply.Pools = append(reply.Pools, Pool{
 			Address:  pool.String(),
-			Decimals: decimals,
+			Decimals: int(d),
 			Liq0Str:  liq0.String(),
 			Liq1Str:  liq1.String(),
 			Liq0Big:  liq0.Int,
