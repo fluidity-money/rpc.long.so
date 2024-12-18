@@ -4,8 +4,8 @@ github.com/awslabs/aws-lambda-go-api-proxy v0.16.2 h1:CJyGEyO1CIwOnXTU40urf0mchf
 github.com/awslabs/aws-lambda-go-api-proxy v0.16.2/go.mod h1:vxxjwBHe/KbgFeNlAP/Tvp4SsVRL3WQamcWRxqVh0z0=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/fluidity-money/long.so v0.0.0-20241217053111-d6e9dca52fd0 h1:WCwMQpOJCP1GonR44G052v39XumYjqQqL9yQOuv8A00=
-github.com/fluidity-money/long.so v0.0.0-20241217053111-d6e9dca52fd0/go.mod h1:ADqimQgUsiokHzLwFqcAXVcgxi36do8wW4cqk1VbX9g=
+github.com/fluidity-money/long.so v0.0.0-20241218022906-6eb0c7f1cf74 h1:vEpeeM90FFaz+uvCdvg031w1i9bMWw33yNrzm6t28G4=
+github.com/fluidity-money/long.so v0.0.0-20241218022906-6eb0c7f1cf74/go.mod h1:ADqimQgUsiokHzLwFqcAXVcgxi36do8wW4cqk1VbX9g=
 github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nosvA=
 github.com/fsnotify/fsnotify v1.7.0/go.mod h1:40Bi/Hjc2AVfZrqy+aj+yEI+/bRxZnMJyTJwOpGvigM=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
