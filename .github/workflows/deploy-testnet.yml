@@ -41,6 +41,8 @@ jobs:
           sudo apt-get install -y zip
 
       - name: Build lambda zip
+        env:
+          GOPRIVATE: github.com/fluidity-money/long.so
         run: |
           make lambda
 
