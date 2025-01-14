@@ -43,26 +43,29 @@ type (
 func (s Service) Reserves(r *http.Request, args *Args, reply *Resp) error {
 	c := ethAbiBind.NewBoundContract(s.a, abi, s.c, s.c, s.c)
 	var a []any
+	if !ethCommon.IsHexAddress(args.Pool) {
+		return fmt.Errorf("not address")
+	}
 	err := c.Call(
 		&ethAbiBind.CallOpts{
 			Context: r.Context(),
 		},
 		&a,
 		"tokenReservesFFCCDB8F",
-		s.a,
+		ethCommon.HexToAddress(args.Pool),
 	)
 	if err != nil {
-		slog.Error("get pool reserves", "err", err)
+		slog.Error("get pool reserves", "err", err, "addr", s.a)
 		return fmt.Errorf("requesting reserves")
 	}
 	amt0, ok := a[0].(*big.Int)
 	if !ok {
-		slog.Error("convert amt 0", "a", a, "a0", a[0])
+		slog.Error("convert amt 0", "a", a, "a0", a[0], "addr", s.a)
 		return fmt.Errorf("decoding reserves0")
 	}
 	amt1, ok := a[1].(*big.Int)
 	if !ok {
-		slog.Error("convert amt 1", "a", a, "a1", a[1])
+		slog.Error("convert amt 1", "a", a, "a1", a[1], "addr", s.a)
 		return fmt.Errorf("decoding reserves1")
 	}
 	reply.Liq0Str = amt0.String()
