@@ -1,4 +1,4 @@
-name: Deploy Mainnet Graph
+name: Deploy Mainnet RPC
 
 on:
   push:

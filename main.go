@@ -1,16 +1,17 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log/slog"
+	"strings"
 	"math/big"
 	"net/http"
 	"os"
 
-	longTypes "github.com/fluidity-money/long.so/lib/types"
-
-	_ "github.com/lib/pq"
+	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethAbiBind "github.com/ethereum/go-ethereum/accounts/abi/bind"
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/gorilla/rpc"
 	"github.com/gorilla/rpc/json"
@@ -20,68 +21,65 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 )
 
+var abi, _ = ethAbi.JSON(strings.NewReader(`[{"type":"function","name":"tokenReservesFFCCDB8F","inputs":[{"name":"pool","type":"address","internalType":"address"}],"outputs":[{"name":"","type":"uint256","internalType":"uint256"},{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"nonpayable"}]`))
+
 type Service struct {
-	db *sql.DB
+	c *ethclient.Client
+	a ethCommon.Address
 }
 
 type (
-	PoolsArgs struct{}
-
-	Pool struct {
-		Address          string
-		Decimals         int
-		Liq0Str, Liq1Str string
-		Liq0Big, Liq1Big *big.Int
+	PoolsArgs struct {
+		Pool string
 	}
 
 	PoolsResp struct {
-		Pools []Pool
+		Address          string
+		Liq0Str, Liq1Str string
+		Liq0Big, Liq1Big *big.Int
 	}
 )
 
 func (s Service) Pools(r *http.Request, args *PoolsArgs, reply *PoolsResp) error {
-	rows, err := s.db.Query(`
-SELECT pool, decimals, cumulative_amount0, cumulative_amount1
-FROM snapshot_positions_latest_decimals_grouped_1`,
+	c := ethAbiBind.NewBoundContract(s.a, abi, s.c, s.c, s.c)
+	var a []any
+	err := c.Call(
+		&ethAbiBind.CallOpts{
+			Context: r.Context(),
+		},
+		&a,
+		"tokenReservesFFCCDB8F",
+		s.a,
 	)
 	if err != nil {
-		slog.Error("Failed to search pools using snapshot_positions_latest_decimals_grouped_1",
-			"error", err,
-		)
-		return fmt.Errorf("search snapshots")
+		slog.Error("get pool reserves", "err", err)
+		return fmt.Errorf("requesting reserves")
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var (
-			pool       longTypes.Address
-			decimals   uint8
-			liq0, liq1 longTypes.UnscaledNumber
-		)
-		if err := rows.Scan(&pool, &decimals, &liq0, &liq1); err != nil {
-			slog.Error("Error scanning pools",
-				"error", err,
-			)
-			return fmt.Errorf("scanning pools")
-		}
-		reply.Pools = append(reply.Pools, Pool{
-			Address:  pool.String(),
-			Decimals: int(decimals),
-			Liq0Str:  liq0.String(),
-			Liq1Str:  liq1.String(),
-			Liq0Big:  liq0.Int,
-			Liq1Big:  liq1.Int,
-		})
+	amt0, ok := a[0].(*big.Int)
+	if !ok {
+		slog.Error("convert amt 0", "a", a, "a0", a[0])
+		return fmt.Errorf("decoding reserves0")
 	}
+	amt1, ok := a[1].(*big.Int)
+	if !ok {
+		slog.Error("convert amt 1", "a", a, "a1", a[1])
+		return fmt.Errorf("decoding reserves1")
+	}
+	reply.Liq0Str = amt0.String()
+	reply.Liq1Str = amt1.String()
+	reply.Liq0Big = amt0
+	reply.Liq1Big = amt1
 	return nil
 }
 
 func main() {
-	db, err := sql.Open("postgres", os.Getenv("SPN_TIMESCALE"))
+	c, err := ethclient.Dial(os.Getenv("SPN_SUPERPOSITION_URL"))
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
-	s := Service{db}
+	defer c.Close()
+	a := ethCommon.HexToAddress(os.Getenv("SPN_LONGTAIL_ADDR"))
+	s := Service{c, a}
 	r := rpc.NewServer()
 	r.RegisterService(&s, "")
 	r.RegisterCodec(json.NewCodec(), "application/json")

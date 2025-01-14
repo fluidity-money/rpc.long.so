@@ -1,4 +1,4 @@
-name: Deploy Testnet Graph
+name: Deploy Testnet RPC
 
 on:
   push:
