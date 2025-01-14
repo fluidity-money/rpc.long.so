@@ -29,18 +29,18 @@ type Service struct {
 }
 
 type (
-	PoolsArgs struct {
+	Args struct {
 		Pool string
 	}
 
-	PoolsResp struct {
+	Resp struct {
 		Address          string
 		Liq0Str, Liq1Str string
 		Liq0Big, Liq1Big *big.Int
 	}
 )
 
-func (s Service) Pools(r *http.Request, args *PoolsArgs, reply *PoolsResp) error {
+func (s Service) Reserves(r *http.Request, args *Args, reply *Resp) error {
 	c := ethAbiBind.NewBoundContract(s.a, abi, s.c, s.c, s.c)
 	var a []any
 	err := c.Call(
